@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "${id}",
+  "version": "${version}",
+  "name": "${name}",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/template/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "fabric-datagen": [
+      "net.heisenkebab.template.client.TemplateMainDataGenerator"
+    ],
+    "client": [
+      "net.heisenkebab.template.client.TemplateMainClient"
+    ],
+    "main": [
+      "net.heisenkebab.template.TemplateMain"
+    ]
+  },
+  "mixins": [
+    "template.mixins.json",
+    {
+      "config": "template.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft}"
+  }
+}

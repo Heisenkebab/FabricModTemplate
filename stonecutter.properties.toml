@@ -1,0 +1,16 @@
+# Shared properties for all Minecraft versions
+mod.id = "template"
+mod.name = "ModTemplate"
+mod.group = "net.heisenkebab"
+mod.version = "1.0.0"
+
+deps.fabric_loader = "0.20.1"
+loomx.loom_version = "1.19.3"
+
+# Per-version properties: check https://fabricmc.net/develop for matching versions
+["1.21.11"]
+# Minecraft range written into fabric.mod.json
+mod.mc_compat = "1.21.11"
+mod.mc_releases = ["1.21.11"]
+
+deps.fabric_api = "0.141.6+1.21.11"

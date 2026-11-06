@@ -1,0 +1,105 @@
+plugins {
+    // Applies the correct Loom variant based on the Minecraft version
+    id("dev.kikugie.loom-back-compat")
+}
+
+// Don't set group here: Stonecutter version projects must not share coordinates
+version = "${property("mod.version")}+${sc.current.version}"
+base.archivesName = property("mod.id") as String
+
+val requiredJava: JavaVersion = when {
+    sc.current.parsed >= "26.1" -> JavaVersion.VERSION_25
+    sc.current.parsed >= "1.20.5" -> JavaVersion.VERSION_21
+    sc.current.parsed >= "1.18" -> JavaVersion.VERSION_17
+    else -> JavaVersion.VERSION_1_8
+}
+
+repositories {
+    // Add repositories for other mods you depend on here
+}
+
+dependencies {
+    minecraft("com.mojang:minecraft:${sc.current.version}")
+    loomx.applyMojangMappings()
+
+    // Keep using mod* configurations even on 26.1+, loom-back-compat converts them
+    modImplementation("net.fabricmc:fabric-loader:${property("deps.fabric_loader")}")
+    modImplementation("net.fabricmc.fabric-api:fabric-api:${sc.properties.get<String>("deps.fabric_api")}")
+}
+
+loom {
+    splitEnvironmentSourceSets()
+
+    mods {
+        register(property("mod.id") as String) {
+            sourceSet(sourceSets["main"])
+            sourceSet(sourceSets["client"])
+        }
+    }
+
+    fabricModJsonPath = rootProject.file("src/main/resources/fabric.mod.json")
+
+    runConfigs.all {
+        generateRunConfig = true
+        // Share one run directory between all versions
+        runDirectory = rootProject.file("run")
+    }
+}
+
+fabricApi {
+    configureDataGeneration {
+        client = true
+    }
+}
+
+java {
+    withSourcesJar()
+    targetCompatibility = requiredJava
+    sourceCompatibility = requiredJava
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(requiredJava.majorVersion)
+    }
+}
+
+tasks {
+    withType<JavaCompile>().configureEach {
+        options.encoding = "UTF-8"
+    }
+
+    processResources {
+        val props = mapOf(
+            "id" to sc.properties.get<String>("mod.id"),
+            "name" to sc.properties.get<String>("mod.name"),
+            "version" to project.version.toString(),
+            "minecraft" to sc.properties.get<String>("mod.mc_compat"),
+            "loader" to sc.properties.get<String>("deps.fabric_loader"),
+        )
+        props.forEach { (key, value) -> inputs.property(key, value) }
+        filesMatching("fabric.mod.json") { expand(props) }
+
+        val mixinJava = "JAVA_${requiredJava.majorVersion}"
+        inputs.property("java", mixinJava)
+        filesMatching("*.mixins.json") { expand("java" to mixinJava) }
+    }
+
+    named<ProcessResources>("processClientResources") {
+        val mixinJava = "JAVA_${requiredJava.majorVersion}"
+        inputs.property("java", mixinJava)
+        filesMatching("*.mixins.json") { expand("java" to mixinJava) }
+    }
+
+    withType<Jar>().configureEach {
+        val name = project.property("mod.id")
+        inputs.property("mod_id", name)
+        from(rootProject.file("LICENSE.txt")) { rename { "LICENSE_$name" } }
+    }
+
+    register<Copy>("buildAndCollect") {
+        group = "build"
+        description = "Builds mod jars and copies them to build/libs/{mod version}/"
+
+        inputs.property("version", project.property("mod.version"))
+        from(loomx.modJar.flatMap { it.archiveFile }, loomx.modSourcesJar.flatMap { it.archiveFile })
+        into(rootProject.layout.buildDirectory.dir("libs/${project.property("mod.version")}"))
+    }
+}
