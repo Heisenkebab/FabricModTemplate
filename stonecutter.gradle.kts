@@ -2,7 +2,7 @@ plugins {
     id("dev.kikugie.stonecutter")
 }
 
-stonecutter active "1.21.11"
+stonecutter active "26.3"
 
 stonecutter parameters {
     // Used as /*$ mod_version*/ and /*$ minecraft*/ in Java sources

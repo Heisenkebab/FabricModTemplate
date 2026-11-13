@@ -1,10 +1,10 @@
 # ModTemplate
 
-A Fabric mod template for building one mod for several Minecraft versions from a single codebase, using [Stonecutter](https://stonecutter.kikugie.dev/). Releases are published to Modrinth and CurseForge by GitHub Actions.
+A Fabric mod template for building one mod for several Minecraft versions (currently 1.21.11 and 26.3) from a single codebase, using [Stonecutter](https://stonecutter.kikugie.dev/). Releases are published to Modrinth and CurseForge by GitHub Actions.
 
 ## Requirements
 
-- JDK 21 (JDK 25 once a 26.1+ version is added). Gradle picks the right toolchain for each Minecraft version and downloads it if needed.
+- Any JDK to start Gradle. Gradle runs on Java 25 and downloads the right JDK for each Minecraft version (21 for 1.21.x, 25 for 26.x) if needed.
 - IntelliJ IDEA with the Minecraft Development and Stonecutter plugins is recommended.
 
 ## Project layout

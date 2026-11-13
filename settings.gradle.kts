@@ -19,7 +19,7 @@ plugins {
 stonecutter {
     create(rootProject) {
         // Add more Minecraft versions here, plus a matching table in stonecutter.properties.toml
-        versions("1.21.11")
+        versions("1.21.11", "26.3")
         vcsVersion = "1.21.11"
     }
 }
