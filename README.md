@@ -66,6 +66,14 @@ deps.fabric_api = "..."
 - `mod.mc_compat` is the Minecraft version range written into `fabric.mod.json`.
 - `mod.mc_releases` lists the game versions the upload is tagged with on Modrinth and CurseForge.
 
+## Kotlin (optional)
+
+Kotlin is off by default. To use it, set `mod.kotlin = true` in `stonecutter.properties.toml` and put Kotlin sources in `src/main/kotlin` and `src/client/kotlin`. Java and Kotlin can be mixed; keep mixins in Java.
+
+When enabled, the build applies the Kotlin plugin, depends on `fabric-language-kotlin` (added to `fabric.mod.json` and to the Modrinth/CurseForge uploads), and targets the same Java version as each Minecraft version. Stonecutter comments work in `.kt` files too.
+
+To update Kotlin, bump `deps.fabric_kotlin` and set the Kotlin plugin version in `settings.gradle.kts` to the Kotlin version in its name (e.g. `1.14.2+kotlin.2.4.21` → `2.4.21`).
+
 ## Publishing
 
 Publishing uses [mod-publish-plugin](https://modmuss50.github.io/mod-publish-plugin/) and uploads one file for each Minecraft version, plus its sources jar.

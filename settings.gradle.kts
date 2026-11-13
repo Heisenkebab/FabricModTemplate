@@ -14,6 +14,8 @@ plugins {
     id("dev.kikugie.loom-back-compat") version "0.4.2"
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
     id("me.modmuss50.mod-publish-plugin") version "2.2.1" apply false
+    // Only applied when mod.kotlin is enabled; keep in sync with deps.fabric_kotlin
+    id("org.jetbrains.kotlin.jvm") version "2.4.21" apply false
 }
 
 stonecutter {

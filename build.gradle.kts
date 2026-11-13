@@ -8,6 +8,9 @@ plugins {
 version = "${property("mod.version")}+${sc.current.version}"
 base.archivesName = property("mod.id") as String
 
+val useKotlin = sc.properties.get<Boolean>("mod.kotlin")
+if (useKotlin) apply(plugin = "org.jetbrains.kotlin.jvm")
+
 val requiredJava: JavaVersion = when {
     sc.current.parsed >= "26.1" -> JavaVersion.VERSION_25
     sc.current.parsed >= "1.20.5" -> JavaVersion.VERSION_21
@@ -26,6 +29,7 @@ dependencies {
     // Keep using mod* configurations even on 26.1+, loom-back-compat converts them
     modImplementation("net.fabricmc:fabric-loader:${property("deps.fabric_loader")}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${sc.properties.get<String>("deps.fabric_api")}")
+    if (useKotlin) modImplementation("net.fabricmc:fabric-language-kotlin:${property("deps.fabric_kotlin")}")
 }
 
 loom {
@@ -53,6 +57,10 @@ fabricApi {
     }
 }
 
+if (useKotlin) extensions.configure<org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension> {
+    compilerOptions.jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(requiredJava.majorVersion)
+}
+
 java {
     withSourcesJar()
     targetCompatibility = requiredJava
@@ -76,7 +84,14 @@ tasks {
             "loader" to sc.properties.get<String>("deps.fabric_loader"),
         )
         props.forEach { (key, value) -> inputs.property(key, value) }
-        filesMatching("fabric.mod.json") { expand(props) }
+        inputs.property("kotlin", useKotlin)
+        filesMatching("fabric.mod.json") {
+            expand(props)
+            // Adds the fabric-language-kotlin dependency after the fabric-api line
+            if (useKotlin) filter { line ->
+                if ("\"fabric-api\"" in line) "$line\n    \"fabric-language-kotlin\": \"*\"," else line
+            }
+        }
 
         val mixinJava = "JAVA_${requiredJava.majorVersion}"
         inputs.property("java", mixinJava)
@@ -131,6 +146,7 @@ publishMods {
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")
         minecraftVersions.addAll(mcReleases)
         requires("fabric-api")
+        if (useKotlin) requires("fabric-language-kotlin")
     }
 
     val curseforgeId = sc.properties.get<String>("publish.curseforge_id")
@@ -142,5 +158,6 @@ publishMods {
         client = true
         server = true
         requires("fabric-api")
+        if (useKotlin) requires("fabric-language-kotlin")
     }
 }

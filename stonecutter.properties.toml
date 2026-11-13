@@ -7,6 +7,10 @@ mod.version = "1.0.0"
 deps.fabric_loader = "0.20.1"
 loomx.loom_version = "1.19.3"
 
+# Optional Kotlin support; the Kotlin plugin version in settings.gradle.kts must match
+mod.kotlin = false
+deps.fabric_kotlin = "1.14.2+kotlin.2.4.21"
+
 # Publishing project ids; leave a platform empty to skip it
 publish.modrinth_id = ""
 publish.curseforge_id = ""
