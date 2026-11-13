@@ -1,6 +1,7 @@
 plugins {
     // Applies the correct Loom variant based on the Minecraft version
     id("dev.kikugie.loom-back-compat")
+    id("me.modmuss50.mod-publish-plugin")
 }
 
 // Don't set group here: Stonecutter version projects must not share coordinates
@@ -91,7 +92,7 @@ tasks {
     withType<Jar>().configureEach {
         val name = project.property("mod.id")
         inputs.property("mod_id", name)
-        from(rootProject.file("LICENSE.txt")) { rename { "LICENSE_$name" } }
+        from(rootProject.file("LICENSE")) { rename { "LICENSE_$name" } }
     }
 
     register<Copy>("buildAndCollect") {
@@ -101,5 +102,45 @@ tasks {
         inputs.property("version", project.property("mod.version"))
         from(loomx.modJar.flatMap { it.archiveFile }, loomx.modSourcesJar.flatMap { it.archiveFile })
         into(rootProject.layout.buildDirectory.dir("libs/${project.property("mod.version")}"))
+    }
+}
+
+publishMods {
+    val modVersion = property("mod.version") as String
+    file = loomx.modJar.flatMap { it.archiveFile }
+    additionalFiles.from(loomx.modSourcesJar.flatMap { it.archiveFile })
+    displayName = "${property("mod.name")} $modVersion for ${sc.current.version}"
+    version = project.version.toString()
+    changelog = providers.environmentVariable("CHANGELOG").orElse("")
+    type = when {
+        "alpha" in modVersion -> ALPHA
+        "beta" in modVersion || "rc" in modVersion -> BETA
+        else -> STABLE
+    }
+    modLoaders.add("fabric")
+    // Uploads nothing unless the token for each platform is set
+    dryRun = providers.environmentVariable("MODRINTH_TOKEN").orNull == null
+        && providers.environmentVariable("CURSEFORGE_TOKEN").orNull == null
+
+    val mcReleases = sc.properties.raw("mod", "mc_releases").asList().map { it.asPrimitive().content.toString() }
+
+    // Platforms are skipped while their project id is left empty in stonecutter.properties.toml
+    val modrinthId = sc.properties.get<String>("publish.modrinth_id")
+    if (modrinthId.isNotBlank()) modrinth {
+        projectId = modrinthId
+        accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+        minecraftVersions.addAll(mcReleases)
+        requires("fabric-api")
+    }
+
+    val curseforgeId = sc.properties.get<String>("publish.curseforge_id")
+    if (curseforgeId.isNotBlank()) curseforge {
+        projectId = curseforgeId
+        accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+        minecraftVersions.addAll(mcReleases)
+        javaVersions.add(requiredJava)
+        client = true
+        server = true
+        requires("fabric-api")
     }
 }

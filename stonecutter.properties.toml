@@ -7,10 +7,15 @@ mod.version = "1.0.0"
 deps.fabric_loader = "0.20.1"
 loomx.loom_version = "1.19.3"
 
+# Publishing project ids; leave a platform empty to skip it
+publish.modrinth_id = ""
+publish.curseforge_id = ""
+
 # Per-version properties: check https://fabricmc.net/develop for matching versions
 ["1.21.11"]
 # Minecraft range written into fabric.mod.json
 mod.mc_compat = "1.21.11"
+# Game versions to tag uploads with on Modrinth/CurseForge
 mod.mc_releases = ["1.21.11"]
 
 deps.fabric_api = "0.141.6+1.21.11"

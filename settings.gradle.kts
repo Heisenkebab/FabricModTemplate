@@ -13,6 +13,7 @@ plugins {
     // Applies the correct Loom variant per Minecraft version (needed once 26.1+ is added)
     id("dev.kikugie.loom-back-compat") version "0.4.2"
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+    id("me.modmuss50.mod-publish-plugin") version "2.2.1" apply false
 }
 
 stonecutter {
